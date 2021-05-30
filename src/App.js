@@ -18,7 +18,7 @@ function App() {
           <Router>
             <Sidebar />
             <Switch>
-              <Route path="/contacts/:contactId">
+              <Route path="/rooms/:roomId">
                 <Chat />
               </Route>
               <Route path="/">{/*<Chat />*/}</Route>

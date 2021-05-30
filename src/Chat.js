@@ -14,19 +14,19 @@ import firebase from "firebase";
 function Chat() {
   const [input, setInput] = useState("");
   const [seed, setSeed] = useState("");
-  const { contactId } = useParams();
-  const [contactName, setContactName] = useState("");
+  const { roomId } = useParams();
+  const [roomName, setroomName] = useState("");
   const [messages, setMessages] = useState([]);
   const [{ user }, dispatch] = useStateValue();
 
   useEffect(() => {
-    if (contactId) {
-      db.collection("contacts")
-        .doc(contactId)
-        .onSnapshot((snapshot) => setContactName(snapshot.data().name));
+    if (roomId) {
+      db.collection("rooms")
+        .doc(roomId)
+        .onSnapshot((snapshot) => setroomName(snapshot.data().name));
 
-      db.collection("contacts")
-        .doc(contactId)
+      db.collection("rooms")
+        .doc(roomId)
         .collection("messages")
         .orderBy("timestamp", "asc")
         .onSnapshot((snapshot) =>
@@ -35,16 +35,21 @@ function Chat() {
 
       setSeed(Math.floor(Math.random() * 5000));
     }
-  }, [contactId]);
+  }, [roomId]);
 
   const sendMessage = (e) => {
     e.preventDefault();
 
-    db.collection("contacts").doc(contactId).collection("messages").add({
+    db.collection("rooms").doc(roomId).collection("messages").add({
       message: input,
       name: user.displayName,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     });
+
+    db.collection("rooms").doc(roomId).update({
+      lasttimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
     setInput("");
   };
 
@@ -53,8 +58,13 @@ function Chat() {
       <div className="chat_header">
         <Avatar src={`https://avatars.dicebear.com/api/human/${seed}.svg`} />
         <div className="chat_headerInfo">
-          <h3>{contactName}</h3>
-          <p>Last seen at ...</p>
+          <h3>{roomName}</h3>
+          <p>
+            Last chat at{" "}
+            {new Date(
+              messages[messages.length - 1]?.timestamp?.toDate()
+            ).toLocaleString()}
+          </p>
         </div>
         <div className="chat_headerRight">
           <IconButton>

@@ -10,18 +10,21 @@ import db from "./firebase";
 import { useStateValue } from "./StateProvider";
 
 function Sidebar() {
-  const [contacts, setContacts] = useState([]);
+  const [rooms, setrooms] = useState([]);
   const [{ user }, dispatch] = useStateValue();
 
   useEffect(() => {
-    const unsubscribe = db.collection("contacts").onSnapshot((snapshot) =>
-      setContacts(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          data: doc.data(),
-        }))
-      )
-    );
+    const unsubscribe = db
+      .collection("rooms")
+      .orderBy("lasttimestamp", "desc")
+      .onSnapshot((snapshot) =>
+        setrooms(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            data: doc.data(),
+          }))
+        )
+      );
 
     return () => {
       unsubscribe();
@@ -51,13 +54,9 @@ function Sidebar() {
         </div>
       </div>
       <div className="sidebar_chats">
-        <SidebarChat addNewChat />
-        {contacts.map((contact) => (
-          <SidebarChat
-            key={contact.id}
-            id={contact.id}
-            name={contact.data.name}
-          />
+        <SidebarChat addNewRoom />
+        {rooms.map((room) => (
+          <SidebarChat key={room.id} id={room.id} name={room.data.name} />
         ))}
       </div>
     </div>
