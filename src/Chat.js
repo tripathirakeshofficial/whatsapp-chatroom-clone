@@ -8,25 +8,43 @@ import React, { useEffect, useState } from "react";
 import "./Chat.css";
 import { useParams } from "react-router-dom";
 import db from "./firebase";
+import { useStateValue } from "./StateProvider";
+import firebase from "firebase";
 
 function Chat() {
   const [input, setInput] = useState("");
   const [seed, setSeed] = useState("");
   const { contactId } = useParams();
   const [contactName, setContactName] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [{ user }, dispatch] = useStateValue();
 
   useEffect(() => {
     if (contactId) {
       db.collection("contacts")
         .doc(contactId)
         .onSnapshot((snapshot) => setContactName(snapshot.data().name));
+
+      db.collection("contacts")
+        .doc(contactId)
+        .collection("messages")
+        .orderBy("timestamp", "asc")
+        .onSnapshot((snapshot) =>
+          setMessages(snapshot.docs.map((doc) => doc.data()))
+        );
+
       setSeed(Math.floor(Math.random() * 5000));
     }
   }, [contactId]);
 
   const sendMessage = (e) => {
     e.preventDefault();
-    console.log("You typed --- ", input);
+
+    db.collection("contacts").doc(contactId).collection("messages").add({
+      message: input,
+      name: user.displayName,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
     setInput("");
   };
 
@@ -51,10 +69,19 @@ function Chat() {
         </div>
       </div>
       <div className="chat_body">
-        <p className={`chat_message ${true && "chat_receiver"}`}>
-          <span className="chat_name">Rakesh Tripathi</span>Hey Guys!
-          <span className="chat_timestamp">3.52pm</span>
-        </p>
+        {messages.map((message) => (
+          <p
+            className={`chat_message ${
+              message.name === user.displayName && "chat_receiver"
+            }`}
+          >
+            <span className="chat_name">{message.name}</span>
+            {message.message}
+            <span className="chat_timestamp">
+              {new Date(message.timestamp?.toDate()).toLocaleString()}
+            </span>
+          </p>
+        ))}
       </div>
       <div className="chat_footer">
         <InsertEmoticonIcon />
