@@ -6,18 +6,28 @@ import InsertEmoticonIcon from "@material-ui/icons/InsertEmoticon";
 import MicIcon from "@material-ui/icons/Mic";
 import React, { useEffect, useState } from "react";
 import "./Chat.css";
+import { useParams } from "react-router-dom";
+import db from "./firebase";
 
 function Chat() {
   const [input, setInput] = useState("");
   const [seed, setSeed] = useState("");
+  const { contactId } = useParams();
+  const [contactName, setContactName] = useState("");
 
   useEffect(() => {
-    setSeed(Math.floor(Math.random() * 5000));
-  }, []);
+    if (contactId) {
+      db.collection("contacts")
+        .doc(contactId)
+        .onSnapshot((snapshot) => setContactName(snapshot.data().name));
+      setSeed(Math.floor(Math.random() * 5000));
+    }
+  }, [contactId]);
 
   const sendMessage = (e) => {
     e.preventDefault();
     console.log("You typed --- ", input);
+    setInput("");
   };
 
   return (
@@ -25,7 +35,7 @@ function Chat() {
       <div className="chat_header">
         <Avatar src={`https://avatars.dicebear.com/api/human/${seed}.svg`} />
         <div className="chat_headerInfo">
-          <h3>Contact name</h3>
+          <h3>{contactName}</h3>
           <p>Last seen at ...</p>
         </div>
         <div className="chat_headerRight">
