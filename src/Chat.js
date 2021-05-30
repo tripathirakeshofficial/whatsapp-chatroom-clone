@@ -53,18 +53,24 @@ function Chat() {
     setInput("");
   };
 
+  console.log(messages);
+
   return (
     <div className="chat">
       <div className="chat_header">
         <Avatar src={`https://avatars.dicebear.com/api/human/${seed}.svg`} />
         <div className="chat_headerInfo">
           <h3>{roomName}</h3>
-          <p>
-            Last chat at{" "}
-            {new Date(
-              messages[messages.length - 1]?.timestamp?.toDate()
-            ).toLocaleString()}
-          </p>
+          {messages.length !== 0 ? (
+            <p>
+              Last chat at{" "}
+              {new Date(
+                messages[messages.length - 1]?.timestamp?.toDate()
+              ).toLocaleString()}
+            </p>
+          ) : (
+            <p>No chat available</p>
+          )}
         </div>
         <div className="chat_headerRight">
           <IconButton>
