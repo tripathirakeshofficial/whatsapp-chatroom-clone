@@ -1,5 +1,6 @@
 export const initialState = {
   user: null,
+  email: null,
 };
 
 export const actionTypes = {
@@ -12,6 +13,7 @@ const reducer = (state, action) => {
       return {
         ...state,
         user: action.user,
+        email: action.email,
       };
     default:
       return state;

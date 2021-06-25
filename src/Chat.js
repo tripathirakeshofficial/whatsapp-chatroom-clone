@@ -37,12 +37,15 @@ function Chat() {
     }
   }, [roomId]);
 
+  console.log(user);
+
   const sendMessage = (e) => {
     e.preventDefault();
 
     db.collection("rooms").doc(roomId).collection("messages").add({
       message: input,
       name: user.displayName,
+      email: user.email,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -52,8 +55,6 @@ function Chat() {
 
     setInput("");
   };
-
-  console.log(messages);
 
   return (
     <div className="chat">
@@ -88,7 +89,7 @@ function Chat() {
         {messages.map((message) => (
           <p
             className={`chat_message ${
-              message.name === user.displayName && "chat_receiver"
+              message.email === user.email && "chat_receiver"
             }`}
           >
             <span className="chat_name">{message.name}</span>
